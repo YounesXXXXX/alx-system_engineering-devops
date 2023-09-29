@@ -1,2 +1,2 @@
 #!/bin/bash
-ls -ap1 | awk 'BEGIN {ORS=""} NR > 2 {print ", "} {print $0} END {print ""}'
+ls -apvm
