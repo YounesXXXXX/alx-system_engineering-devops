@@ -1,40 +1,34 @@
 #!/usr/bin/python3
-"""Returns info about employee's todo list progress."""
+"""Request employee ID from API
+"""
 
+from json import load
 import requests
-import sys
+from sys import argv
 
+if __name__ == "__main__":
 
-if __name__ == '__main__':
-    empId = sys.argv[1]
-    userUrl = "https://jsonplaceholder.typicode.com/users/"
-    userInfo = userUrl + empId
-    taskInfo = userUrl + empId + "/todos"
+    def make_request(resource, param=None):
+        """Retrieve user from API
+        """
+        url = 'https://jsonplaceholder.typicode.com/'
+        url += resource
+        if param:
+            url += ('?' + param[0] + '=' + param[1])
 
-    # Send API requests
-    userResponse = requests.get(userInfo)
-    taskResponse = requests.get(taskInfo)
+        # make request
+        r = requests.get(url)
 
-    # Get employee name from userResponse
-    empName = userResponse.json().get('name')
+        # extract json response
+        r = r.json()
+        return r
 
-    # Get tasks from taskResponse as todos
-    todos = taskResponse.json()
+    user = make_request('users', ('id', argv[1]))
+    tasks = make_request('todos', ('userId', argv[1]))
+    tasks_completed = [task for task in tasks if task['completed']]
 
-    # Store number of todos in a variable allTasks
-    allTasks = len(todos)
-
-    # Create storage array for completed todos
-    compTasks = []
-
-    # Create counter for completed todos
-    comp = 0
-
-    for item in todos:
-        if item['completed'] is True:
-            compTasks.append(item)
-            comp += 1
-
-    print(f'Employee {empName} is done with tasks({comp}/{allTasks}):')
-    for item in compTasks:
-        print(f'\t {item["title"]}')
+    print('Employee {} is done with tasks({}/{}):'.format(user[0]['name'],
+                                                          len(tasks_completed),
+                                                          len(tasks)))
+    for task in tasks_completed:
+        print('\t {}'.format(task['title']))
